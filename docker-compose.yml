@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+    channel_rabbitmq_service:
+      image: rabbitmq:3.9.17-management@sha256:bfaf3cb4a3002c09707b80ca62eabb886e3070638c12aed46809e456af584b40
+      container_name: channel_rabbitmq_service
+      ports:
+        - "5672:5672"
+        - "15672:15672"
+      restart: unless-stopped
+      networks:
+        - default
+
+    channel_backend_service:
+      build: 
+        context: .
+        dockerfile: ./Dockerfile
+      stop_signal: SIGINT
+      container_name: channel_backend_service
+      image: channel_backend_service
+      ports:
+        - "9001:9001"
+      # ? For automatically updating the container (for development only)
+      volumes:
+        - .:/app
+      restart: always
+      networks:
+        - default
+
+networks:
+  default:
+    name: messaging_system
+      # amqp://channel_rabbitmq_service:5672
